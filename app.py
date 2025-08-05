@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # ---------------------------
-# Load Models (currently using FakeModel → replace with real ones later)
+# Load Models (fake for now)
 # ---------------------------
 class FakeModel:
     def predict(self, X):
@@ -20,7 +20,7 @@ mlp_model_dj = FakeModel()
 # ---------------------------
 st.set_page_config(page_title="Investment Prediction", page_icon="💹", layout="wide")
 
-# Apply Custom Background Image (CSS hack)
+# Background
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -35,15 +35,10 @@ page_bg_img = """
 """
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
-# Banner Image
-st.image("banner.jpg", use_column_width=True, caption="💹 AI-Powered Investment Simulator")
+# Banner
+st.image("banner.jpg", use_container_width=True, caption="💹 AI-Powered Investment Simulator")
 
 st.title("📈 Investment Prediction Simulator")
-
-# Sidebar with Gold & DJIA Images
-st.sidebar.header("Choose Investment Option")
-st.sidebar.image("gold.jpg", caption="Gold", use_column_width=True)
-st.sidebar.image("djia.jpg", caption="DJIA", use_column_width=True)
 
 # ---------------------------
 # User Inputs
@@ -52,6 +47,12 @@ capital = st.number_input("💵 Capital ($):", min_value=100.0, value=1000.0, st
 shares = st.number_input("📦 Shares:", min_value=1, value=10, step=1)
 investment_option = st.selectbox("📊 Invest in:", ["DJIA", "Gold"])
 model_choice = st.selectbox("🧠 Model:", ["XGBoost", "MLP"])
+
+# Show Selected Asset Image
+if investment_option == "Gold":
+    st.image("gold.jpg", caption="Gold Market", use_container_width=True)
+elif investment_option == "DJIA":
+    st.image("djia.jpg", caption="Dow Jones (DJIA)", use_container_width=True)
 
 # ---------------------------
 # Prediction Button
@@ -98,16 +99,47 @@ if st.button("💡 Predict & Explain"):
         st.error("❌ No, it's not a good time to invest.")
 
     # ---------------------------
-    # Sample Chart (Price Trends)
+    # Chart 1: Historical Price Trend (Selected Asset)
     # ---------------------------
     st.markdown("### 📊 Historical Price Trend")
     dates = pd.date_range("2023-01-01", periods=30)
     prices = np.cumsum(np.random.randn(30)) + 100  # fake trend
-    fig, ax = plt.subplots()
-    ax.plot(dates, prices, label=investment_option, linewidth=2)
+    fig, ax = plt.subplots(figsize=(6,4))
+    ax.plot(dates, prices, label=investment_option, linewidth=2, color="blue")
+    ax.set_title(f"{investment_option} Price Trend")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price")
+    ax.grid(True, linestyle="--", alpha=0.6)
     ax.legend()
     st.pyplot(fig)
+
+    # ---------------------------
+    # Chart 2: Gold vs DJIA Comparison (Side-by-Side)
+    # ---------------------------
+    st.markdown("### 📊 Gold vs DJIA Comparison")
+
+    # Fake data for both
+    gold_prices = np.cumsum(np.random.randn(30)) + 1800  # gold near 1800
+    djia_prices = np.cumsum(np.random.randn(30)) + 35000  # DJIA near 35k
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig1, ax1 = plt.subplots(figsize=(5,3))
+        ax1.plot(dates, gold_prices, color="gold", linewidth=2)
+        ax1.set_title("Gold Price Trend")
+        ax1.set_xlabel("Date")
+        ax1.set_ylabel("Price (USD)")
+        ax1.grid(True, linestyle="--", alpha=0.6)
+        st.pyplot(fig1)
+
+    with col2:
+        fig2, ax2 = plt.subplots(figsize=(5,3))
+        ax2.plot(dates, djia_prices, color="green", linewidth=2)
+        ax2.set_title("DJIA Price Trend")
+        ax2.set_xlabel("Date")
+        ax2.set_ylabel("Index Value")
+        ax2.grid(True, linestyle="--", alpha=0.6)
+        st.pyplot(fig2)
 
     st.caption("⚠️ Disclaimer: This is based on model outputs. Markets may change. Invest responsibly.")
