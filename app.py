@@ -67,15 +67,24 @@ if st.button("💡 Predict & Explain"):
     # Debug: show model type
     st.write(f"🔍 Using model type: {type(model)}")
 
-    # Prediction
-    predicted_return = model.predict(test_data)[0]
-    final_capital = capital + (predicted_return * shares)
-    profit_or_loss = final_capital - capital
+    # Prediction (using your real trained model)
+    predicted_price = model.predict(test_data)[0]
 
-    # Sentiment & Tags (simulated)
+    # Get actual open price (must exist in test data)
+    if "Open" in test_data.columns:
+        actual_open = test_data["Open"].values[0]
+    else:
+        actual_open = test_data.iloc[0, 0]  # fallback: first column
+
+    # Calculate profit/loss based on price change
+    price_change = predicted_price - actual_open
+    profit_or_loss = price_change * shares
+    final_capital = capital + profit_or_loss
+
+    # Sentiment & Tags (simulated for now)
     sentiment_score = round(np.random.uniform(-1, 1), 2)
-    technical_tag = "Bullish 📈" if predicted_return > 0 else "Bearish 📉"
-    fundamental_tag = "Stable ⚖️" if abs(predicted_return) < 2 else "Volatile 🌪️"
+    technical_tag = "Bullish 📈" if price_change > 0 else "Bearish 📉"
+    fundamental_tag = "Stable ⚖️" if abs(price_change) < 50 else "Volatile 🌪️"
 
     # ---------------------------
     # Display Metrics
@@ -176,9 +185,9 @@ if st.button("💡 Predict & Explain"):
     else:
         explanation.append("🌪️ Fundamentals are volatile, indicating macro uncertainty.")
 
-    if predicted_return > 0 and sentiment_score > 0.3:
-        final_reason = "✅ Overall, multiple signals are aligned positively — suggesting it's a good time to invest."
-    elif predicted_return > 0:
+    if price_change > 0 and sentiment_score > 0.3:
+        final_reason = "✅ Multiple signals align positively — suggesting it's a good time to invest."
+    elif price_change > 0:
         final_reason = "🟡 Some signals are positive but not all — caution is advised."
     else:
         final_reason = "❌ Most signals indicate weakness — not a good time to invest."
