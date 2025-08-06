@@ -58,10 +58,10 @@ if st.button("💡 Predict & Explain"):
     # Pick model & load test data
     if investment_option == "DJIA":
         model = xgb_model_dj if model_choice == "XGBoost" else mlp_model_dj
-        test_data = pd.read_csv("X_test_dj.csv").iloc[[0]]  # first row DJIA test
+        test_data = pd.read_csv("X_test_dj.csv").iloc[[0]]
     else:
         model = xgb_model_gold if model_choice == "XGBoost" else mlp_model_gold
-        test_data = pd.read_csv("X_test_gold.csv").iloc[[0]]  # first row Gold test
+        test_data = pd.read_csv("X_test_gold.csv").iloc[[0]]
 
     # Debug: show model type
     st.write(f"🔍 Using model type: {type(model)}")
@@ -88,12 +88,14 @@ if st.button("💡 Predict & Explain"):
         st.metric("📊 Profit/Loss", f"${profit_or_loss:.2f}")
 
     # ---------------------------
-    # Chart 1: Historical Price Trend (real data)
+    # Chart 1: Historical Price Trend (real data, fixed)
     # ---------------------------
     st.markdown("### 📊 Historical Price Trend")
 
     if investment_option == "Gold":
         gold_df = pd.read_csv("gold_prices.csv", index_col=0, parse_dates=True)
+        gold_df["Close"] = pd.to_numeric(gold_df["Close"], errors="coerce")
+
         fig, ax = plt.subplots(figsize=(8,4))
         ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
         ax.set_title("Gold Price Trend (2015 → 2024)")
@@ -105,6 +107,8 @@ if st.button("💡 Predict & Explain"):
 
     elif investment_option == "DJIA":
         djia_df = pd.read_csv("djia_prices.csv", index_col=0, parse_dates=True)
+        djia_df["Close"] = pd.to_numeric(djia_df["Close"], errors="coerce")
+
         fig, ax = plt.subplots(figsize=(8,4))
         ax.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
         ax.set_title("DJIA Price Trend (2015 → 2024)")
@@ -115,12 +119,15 @@ if st.button("💡 Predict & Explain"):
         st.pyplot(fig)
 
     # ---------------------------
-    # Chart 2: Gold vs DJIA Comparison (real data)
+    # Chart 2: Gold vs DJIA Comparison (real data, fixed)
     # ---------------------------
     st.markdown("### 📊 Gold vs DJIA Comparison")
 
     gold_df = pd.read_csv("gold_prices.csv", index_col=0, parse_dates=True)
+    gold_df["Close"] = pd.to_numeric(gold_df["Close"], errors="coerce")
+
     djia_df = pd.read_csv("djia_prices.csv", index_col=0, parse_dates=True)
+    djia_df["Close"] = pd.to_numeric(djia_df["Close"], errors="coerce")
 
     fig, ax = plt.subplots(figsize=(10,5))
     ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
