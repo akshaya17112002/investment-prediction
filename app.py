@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import joblib
 
 # ---------------------------
@@ -94,7 +93,7 @@ if st.button("💡 Predict & Explain"):
     st.markdown("### 📊 Historical Price Trend")
 
     if investment_option == "Gold":
-        gold_df = pd.read_csv("gold_prices.csv", parse_dates=["Date"], index_col="Date")
+        gold_df = pd.read_csv("gold_prices.csv", index_col=0, parse_dates=True)
         fig, ax = plt.subplots(figsize=(8,4))
         ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
         ax.set_title("Gold Price Trend (2015 → 2024)")
@@ -105,7 +104,7 @@ if st.button("💡 Predict & Explain"):
         st.pyplot(fig)
 
     elif investment_option == "DJIA":
-        djia_df = pd.read_csv("djia_prices.csv", parse_dates=["Date"], index_col="Date")
+        djia_df = pd.read_csv("djia_prices.csv", index_col=0, parse_dates=True)
         fig, ax = plt.subplots(figsize=(8,4))
         ax.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
         ax.set_title("DJIA Price Trend (2015 → 2024)")
@@ -116,12 +115,12 @@ if st.button("💡 Predict & Explain"):
         st.pyplot(fig)
 
     # ---------------------------
-    # Chart 2: Gold vs DJIA Comparison
+    # Chart 2: Gold vs DJIA Comparison (real data)
     # ---------------------------
     st.markdown("### 📊 Gold vs DJIA Comparison")
 
-    gold_df = pd.read_csv("gold_prices.csv", parse_dates=["Date"], index_col="Date")
-    djia_df = pd.read_csv("djia_prices.csv", parse_dates=["Date"], index_col="Date")
+    gold_df = pd.read_csv("gold_prices.csv", index_col=0, parse_dates=True)
+    djia_df = pd.read_csv("djia_prices.csv", index_col=0, parse_dates=True)
 
     fig, ax = plt.subplots(figsize=(10,5))
     ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
