@@ -59,16 +59,20 @@ if st.button("💡 Predict & Explain"):
     # Pick model
     if investment_option == "DJIA":
         model = xgb_model_dj if model_choice == "XGBoost" else mlp_model_dj
+        test_data = pd.read_csv("X_test_dj.csv").iloc[[0]]  # first row of DJIA test data
     else:
         model = xgb_model_gold if model_choice == "XGBoost" else mlp_model_gold
+        test_data = pd.read_csv("X_test_gold.csv").iloc[[0]]  # first row of Gold test data
 
-    # Prediction (using your real trained model)
-    # NOTE: we pass dummy input for now, replace with real features later
-    predicted_return = model.predict(np.zeros((1, model.n_features_in_)))[0]
+    # Debug: show model type
+    st.write(f"🔍 Using model type: {type(model)}")
+
+    # Prediction (using real test data now)
+    predicted_return = model.predict(test_data)[0]
     final_capital = capital + (predicted_return * shares)
     profit_or_loss = final_capital - capital
 
-    # Sentiment & Tags (still simulated)
+    # Sentiment & Tags (still simulated for now)
     sentiment_score = round(np.random.uniform(-1, 1), 2)
     technical_tag = "Bullish 📈" if predicted_return > 0 else "Bearish 📉"
     fundamental_tag = "Stable ⚖️" if abs(predicted_return) < 2 else "Volatile 🌪️"
