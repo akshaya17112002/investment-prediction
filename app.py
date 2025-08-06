@@ -56,23 +56,23 @@ elif investment_option == "DJIA":
 # Prediction Button
 # ---------------------------
 if st.button("💡 Predict & Explain"):
-    # Pick model
+    # Pick model & load test data
     if investment_option == "DJIA":
         model = xgb_model_dj if model_choice == "XGBoost" else mlp_model_dj
-        test_data = pd.read_csv("X_test_dj.csv").iloc[[0]]  # first row of DJIA test data
+        test_data = pd.read_csv("X_test_dj.csv").iloc[[0]]  # first row DJIA test
     else:
         model = xgb_model_gold if model_choice == "XGBoost" else mlp_model_gold
-        test_data = pd.read_csv("X_test_gold.csv").iloc[[0]]  # first row of Gold test data
+        test_data = pd.read_csv("X_test_gold.csv").iloc[[0]]  # first row Gold test
 
     # Debug: show model type
     st.write(f"🔍 Using model type: {type(model)}")
 
-    # Prediction (using real test data now)
+    # Prediction
     predicted_return = model.predict(test_data)[0]
     final_capital = capital + (predicted_return * shares)
     profit_or_loss = final_capital - capital
 
-    # Sentiment & Tags (still simulated for now)
+    # Sentiment & Tags (simulated)
     sentiment_score = round(np.random.uniform(-1, 1), 2)
     technical_tag = "Bullish 📈" if predicted_return > 0 else "Bearish 📉"
     fundamental_tag = "Stable ⚖️" if abs(predicted_return) < 2 else "Volatile 🌪️"
@@ -89,54 +89,49 @@ if st.button("💡 Predict & Explain"):
         st.metric("📊 Profit/Loss", f"${profit_or_loss:.2f}")
 
     # ---------------------------
-    # Chart 1: Historical Price Trend
+    # Chart 1: Historical Price Trend (real data)
     # ---------------------------
     st.markdown("### 📊 Historical Price Trend")
-    dates = pd.date_range("2023-01-01", periods=30)
-    prices = np.cumsum(np.random.randn(30)) + 100
-    fig, ax = plt.subplots(figsize=(6,4))
-    ax.plot(dates, prices, label=investment_option, linewidth=2, color="blue")
-    date_range = f"{dates[0].strftime('%b %d, %Y')} → {dates[-1].strftime('%b %d, %Y')}"
-    ax.set_title(f"{investment_option} Price Trend\n({date_range})")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price")
-    ax.grid(True, linestyle="--", alpha=0.6)
-    ax.legend()
-    ax.xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d, %Y"))
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
+
+    if investment_option == "Gold":
+        gold_df = pd.read_csv("gold_prices.csv", parse_dates=["Date"], index_col="Date")
+        fig, ax = plt.subplots(figsize=(8,4))
+        ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
+        ax.set_title("Gold Price Trend (2015 → 2024)")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("Price (USD)")
+        ax.grid(True, linestyle="--", alpha=0.6)
+        ax.legend()
+        st.pyplot(fig)
+
+    elif investment_option == "DJIA":
+        djia_df = pd.read_csv("djia_prices.csv", parse_dates=["Date"], index_col="Date")
+        fig, ax = plt.subplots(figsize=(8,4))
+        ax.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
+        ax.set_title("DJIA Price Trend (2015 → 2024)")
+        ax.set_xlabel("Year")
+        ax.set_ylabel("Index Value")
+        ax.grid(True, linestyle="--", alpha=0.6)
+        ax.legend()
+        st.pyplot(fig)
 
     # ---------------------------
     # Chart 2: Gold vs DJIA Comparison
     # ---------------------------
     st.markdown("### 📊 Gold vs DJIA Comparison")
 
-    gold_prices = np.cumsum(np.random.randn(30)) + 1800
-    djia_prices = np.cumsum(np.random.randn(30)) + 35000
+    gold_df = pd.read_csv("gold_prices.csv", parse_dates=["Date"], index_col="Date")
+    djia_df = pd.read_csv("djia_prices.csv", parse_dates=["Date"], index_col="Date")
 
-    colA, colB = st.columns(2)
-    with colA:
-        fig1, ax1 = plt.subplots(figsize=(5,3))
-        ax1.plot(dates, gold_prices, color="gold", linewidth=2)
-        ax1.set_title(f"Gold Price Trend\n({date_range})")
-        ax1.set_xlabel("Date")
-        ax1.set_ylabel("Price (USD)")
-        ax1.grid(True, linestyle="--", alpha=0.6)
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter("%b %d, %Y"))
-        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
-        st.pyplot(fig1)
-
-    with colB:
-        fig2, ax2 = plt.subplots(figsize=(5,3))
-        ax2.plot(dates, djia_prices, color="green", linewidth=2)
-        ax2.set_title(f"DJIA Price Trend\n({date_range})")
-        ax2.set_xlabel("Date")
-        ax2.set_ylabel("Index Value")
-        ax2.grid(True, linestyle="--", alpha=0.6)
-        ax2.xaxis.set_major_formatter(mdates.DateFormatter("%b %d, %Y"))
-        plt.setp(ax2.xaxis.get_majorticklabels(), rotation=45)
-        st.pyplot(fig2)
+    fig, ax = plt.subplots(figsize=(10,5))
+    ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
+    ax.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
+    ax.set_title("Gold vs DJIA (2015 → 2024)")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Value")
+    ax.grid(True, linestyle="--", alpha=0.6)
+    ax.legend()
+    st.pyplot(fig)
 
     # ---------------------------
     # EXPLANATION
