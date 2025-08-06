@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
+import matplotlib.dates as mdates
 
 # ---------------------------
 # Load Real Models
@@ -88,7 +89,7 @@ if st.button("💡 Predict & Explain"):
         st.metric("📊 Profit/Loss", f"${profit_or_loss:.2f}")
 
     # ---------------------------
-    # Chart 1: Historical Price Trend (real data, fixed)
+    # Chart 1: Historical Price Trend (real data)
     # ---------------------------
     st.markdown("### 📊 Historical Price Trend")
 
@@ -119,9 +120,9 @@ if st.button("💡 Predict & Explain"):
         st.pyplot(fig)
 
     # ---------------------------
-    # Chart 2: Gold vs DJIA Comparison (real data, fixed)
+    # Chart 2: Gold vs DJIA Comparison (Dual Axis)
     # ---------------------------
-    st.markdown("### 📊 Gold vs DJIA Comparison")
+    st.markdown("### 📊 Gold vs DJIA Comparison (Dual Axis)")
 
     gold_df = pd.read_csv("gold_prices.csv", index_col=0, parse_dates=True)
     gold_df["Close"] = pd.to_numeric(gold_df["Close"], errors="coerce")
@@ -129,14 +130,27 @@ if st.button("💡 Predict & Explain"):
     djia_df = pd.read_csv("djia_prices.csv", index_col=0, parse_dates=True)
     djia_df["Close"] = pd.to_numeric(djia_df["Close"], errors="coerce")
 
-    fig, ax = plt.subplots(figsize=(10,5))
-    ax.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
-    ax.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
-    ax.set_title("Gold vs DJIA (2015 → 2024)")
-    ax.set_xlabel("Year")
-    ax.set_ylabel("Value")
-    ax.grid(True, linestyle="--", alpha=0.6)
-    ax.legend()
+    fig, ax1 = plt.subplots(figsize=(10,5))
+
+    # Gold on left axis
+    ax1.plot(gold_df.index, gold_df["Close"], color="gold", linewidth=2, label="Gold")
+    ax1.set_ylabel("Gold Price (USD)", color="gold")
+    ax1.tick_params(axis="y", labelcolor="gold")
+
+    # DJIA on right axis
+    ax2 = ax1.twinx()
+    ax2.plot(djia_df.index, djia_df["Close"], color="green", linewidth=2, label="DJIA")
+    ax2.set_ylabel("DJIA Index Value", color="green")
+    ax2.tick_params(axis="y", labelcolor="green")
+
+    # Title & X-axis formatting
+    ax1.set_title("Gold vs DJIA (2015 → 2024)")
+    ax1.set_xlabel("Year")
+    ax1.grid(True, linestyle="--", alpha=0.6)
+    ax1.xaxis.set_major_locator(mdates.YearLocator())
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
+
     st.pyplot(fig)
 
     # ---------------------------
